@@ -1,5 +1,6 @@
 import config from 'config';
 import { server } from 'framework/server';
+import users from 'controllers/users';
 
 server({
   // HTTP server configuration
@@ -19,6 +20,10 @@ server({
       description: 'Backend service for creating, editing and deleting users',
       version: '1.0.0',
     },
+  },
+
+  controllers: {
+    users,
   },
 }).then(({ start }) => start(({ log }, err) => {
   if (err) {

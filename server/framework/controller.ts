@@ -6,6 +6,12 @@ export type ControllerActions<T> = {
     : never;
 };
 
+export type Router<T> = {
+  [K in keyof T as string]: T[K] extends ControllerActions<infer T>
+    ? ControllerActions<T>
+    : never;
+};
+
 export const Controller = <
   T extends object,
 >(

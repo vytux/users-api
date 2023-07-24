@@ -1,16 +1,19 @@
-import fastifySwagger, { FastifyDynamicSwaggerOptions } from '@fastify/swagger';
 import {
+  ZodTypeProvider,
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod';
+import fastifySwagger, { FastifyDynamicSwaggerOptions } from '@fastify/swagger';
+import Action from 'framework/action';
+import { ControllerActions } from 'framework/controller';
 import Fastify from 'fastify';
 import { RequestError } from 'framework/errors';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { STATUS_CODES as statusCodes } from 'http';
 import { z } from 'zod';
 
-export interface FrameworkOptions {
+export interface FrameworkOptions<T> {
   /**
    * Port of the HTTP server
    */
@@ -31,15 +34,24 @@ export interface FrameworkOptions {
    * OpenAPI configuration
    */
   openapi: FastifyDynamicSwaggerOptions['openapi'];
+  /**
+   * List of controller that will be accessible through http
+   */
+  controllers: {
+    [K in keyof T as string]: T[K] extends ControllerActions<infer T>
+      ? ControllerActions<T>
+      : never;
+  };
 }
 
-export const server = async ({
+export const server = async <Controllers>({
   port,
   host,
   documentationRoute,
   openapi,
+  controllers,
   ...fastifyOptions
-}: FrameworkOptions) => {
+}: FrameworkOptions<Controllers>) => {
   const httpServer = Fastify(fastifyOptions);
 
   /** Setup swagger */
@@ -56,6 +68,25 @@ export const server = async ({
       routePrefix: documentationRoute,
     });
   }
+
+  Object.values<ControllerActions<unknown>>(controllers).forEach(controller => {
+    Object.values<Action<unknown, unknown>>(controller).forEach(action => {
+
+      const key = action.method === 'GET'
+        ? 'params'
+        : 'body';
+
+      httpServer.withTypeProvider<ZodTypeProvider>().route({
+        url: action.route,
+        method: action.method,
+        schema: {
+          [key]: action.input,
+          response: { 200: action.output },
+        },
+        handler: async (req, res) => res.send(await action(req[key])),
+      });
+    });
+  });
 
   httpServer.setErrorHandler(function (error, _, reply) {
     if (error instanceof RequestError) {
