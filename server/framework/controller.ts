@@ -1,8 +1,8 @@
 import Action from 'framework/action';
 
 export type ControllerActions<T> = {
-  [K in keyof T as string]: T[K] extends Action<infer Input, infer Output>
-    ? Action<Input, Output>
+  [K in keyof T as string]: T[K] extends Action<infer Params, infer Query, infer Body, infer Headers, infer Output>
+    ? Action<Params, Query, Body, Headers, Output>
     : never;
 };
 

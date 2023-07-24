@@ -69,21 +69,36 @@ export const server = async <Controllers>({
     });
   }
 
+  // Register controller routes into Fastify
   Object.values<ControllerActions<unknown>>(controllers).forEach(controller => {
-    Object.values<Action<unknown, unknown>>(controller).forEach(action => {
+    Object.values<Action<unknown, unknown, unknown, unknown, unknown>>(controller).forEach(action => {
+      const params = action.params instanceof z.ZodUndefined
+        ? {}
+        : { params: action.params };
 
-      const key = action.method === 'GET'
-        ? 'params'
-        : 'body';
+      const query = action.query instanceof z.ZodUndefined
+        ? {}
+        : { query: action.query };
+
+      const headers = action.headers instanceof z.ZodUndefined
+        ? {}
+        : { headers: action.headers };
+
+      const body = action.method === 'GET' || action.body instanceof z.ZodUndefined
+        ? {}
+        : { body: action.body };
 
       httpServer.withTypeProvider<ZodTypeProvider>().route({
         url: action.route,
         method: action.method,
         schema: {
-          [key]: action.input,
+          ...params,
+          ...query,
+          ...body,
+          ...headers,
           response: { 200: action.output },
         },
-        handler: async (req, res) => res.send(await action(req[key])),
+        handler: async (req, res) => res.send(await action(req)),
       });
     });
   });
