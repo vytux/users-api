@@ -4,6 +4,14 @@
   "main": "index.js",
   "author": "Vytautas Povilaitis",
   "license": "MIT",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "typecheck:watch": "tsc -b --watch",
+    "start": "NODE_PATH=server:$NODE_PATH tsx server/server.ts",
+    "start:dev": "nodemon --watch-dir server --ext \"ts,json\" --exec \"NODE_PATH=server:$NODE_PATH tsx server/server.ts --dev\""
+  },
   "dependencies": {
     "fastify": "^4.20.0",
     "zod": "^3.21.4"
