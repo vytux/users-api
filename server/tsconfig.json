@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "baseUrl": "./",
+    "rootDir": "./",
+    "composite": true,
+    "outDir": "./../build",
+    "incremental": true,
+    "lib": [
+      "ES2022"
+    ],
+    "strict": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noImplicitOverride": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

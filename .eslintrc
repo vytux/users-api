@@ -6,12 +6,10 @@
     "useJSXTextNode": true
   },
   "plugins": [
-    "@typescript-eslint",
-    "react"
+    "@typescript-eslint"
   ],
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
@@ -20,7 +18,6 @@
     "no-console": 2,
     "quotes": [2, "single", { "avoidEscape": true }],
     "@typescript-eslint/indent": [2, 2],
-    "react/jsx-uses-vars": 2,
     "no-duplicate-imports": [2, { "includeExports": true }],
     "prefer-const": 2,
     "eqeqeq": 2,
