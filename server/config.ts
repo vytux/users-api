@@ -5,16 +5,18 @@ import { z } from 'zod';
 const envSchema = z.object({
   env: z.string(),
 
-  HTTP_PORT: z.coerce.number().positive(),
-  HTTP_HOST: z.string().nonempty(),
+  HTTP_PORT: z.coerce.number().positive().describe('Port used to server http'),
+  HTTP_HOST: z.string().nonempty().describe('Host to bound http socket to'),
 
   HTTP_LOG: z.preprocess(
     n => typeof n === 'string' && n.toLowerCase() === 'true',
     z.boolean(),
-  ),
+  ).describe('Should server logs be printed to stdout?'),
 
-  JWT_PRIVATE_KEY: z.string().nonempty(),
-  JWT_PUBLIC_KEY: z.string().nonempty(),
+  JWT_PRIVATE_KEY: z.string().nonempty().describe('Private key JWT will be encrypted with'),
+  JWT_PUBLIC_KEY: z.string().nonempty().describe('Public key JWT will be decrypted with'),
+
+  PASSWORD_SALT_ROUNDS: z.coerce.number().gt(1).describe('How many encryption rounds to use for passwords'),
 });
 
 let result: z.infer<typeof envSchema>;
