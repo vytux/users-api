@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { z } from 'zod';
 
 const envSchema = z.object({
+  env: z.string(),
   HTTP_PORT: z.coerce.number().positive(),
   HTTP_HOST: z.string().nonempty(),
   HTTP_LOG: z.preprocess(
@@ -30,7 +31,10 @@ try {
     throw error;
   }
 
-  result = envSchema.parse(cfg.parsed);
+  result = envSchema.parse({
+    env: process.env.NODE_ENV?.toLowerCase() ?? 'production',
+    ...cfg.parsed,
+  });
 } catch (error) {
   if (error instanceof z.ZodError) {
     const errorFormatOptions: ErrorMessageOptions = {
