@@ -70,7 +70,7 @@ export const server = async <Controllers>({
   }
 
   // Register controller routes into Fastify
-  Object.values<ControllerActions<unknown>>(controllers).forEach(controller => {
+  Object.entries<ControllerActions<unknown>>(controllers).forEach(([tag, controller]) => {
     Object.values<Action<unknown, unknown, unknown, unknown, unknown>>(controller).forEach(action => {
       const params = action.params instanceof z.ZodUndefined
         ? {}
@@ -92,6 +92,9 @@ export const server = async <Controllers>({
         url: action.route,
         method: action.method,
         schema: {
+          summary: action.summary,
+          description: action.description,
+          tags: [tag],
           ...params,
           ...query,
           ...body,

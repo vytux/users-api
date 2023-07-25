@@ -38,6 +38,8 @@ type ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType> = {
   readonly body: BodyType;
   readonly headers: HeadersType;
   readonly output: OutputType;
+  readonly summary: string | undefined;
+  readonly description: string | undefined;
 };
 
 type Action<Params, Query, Body, Headers, Output> =
@@ -65,6 +67,8 @@ function action<
   body,
   headers,
   output,
+  summary,
+  description,
   handler,
 }: {
   method: HttpMethod;
@@ -75,6 +79,8 @@ function action<
   body?: Body;
   headers?: Headers;
   output?: Output;
+  summary?: string,
+  description?: string,
   handler: ActionHandler<Input, Output>;
 }) {
   const props = {
@@ -86,6 +92,8 @@ function action<
     body: body ? z.object(body) : z.undefined(),
     headers: headers ? z.object(headers) : z.undefined(),
     output: output ?? z.void(),
+    summary,
+    description,
   } as ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType>;
 
   const action = handler as Action<Params, Query, Body, Headers, Output>;
