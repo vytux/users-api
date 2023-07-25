@@ -62,6 +62,13 @@ export const server = async ({
   if (documentationRoute) {
     await httpServer.register(fastifySwaggerUI, {
       routePrefix: documentationRoute,
+      theme: {
+        // Hides SwaggerUI TopBar and documentation link
+        css: [{
+          filename: 'custom.css',
+          content: '.topbar, .information-container .info hgroup > a { display: none }'
+        }]
+      }
     });
   }
 
