@@ -9,8 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "typecheck:watch": "tsc -b --watch",
-    "start": "NODE_PATH=server:$NODE_PATH tsx server/server.ts",
-    "start:dev": "nodemon --watch-dir server --ext \"ts,json\" --exec \"NODE_PATH=server:$NODE_PATH tsx server/server.ts --dev\""
+    "test": "NODE_ENV=test NODE_PATH=server:$NODE_PATH ts-mocha -p server/tsconfig.json",
+    "test:watch": "NODE_ENV=test NODE_PATH=server:$NODE_PATH ts-mocha -p server/tsconfig.json --watch",
+    "start": "NODE_ENV=production NODE_PATH=server:$NODE_PATH tsx server/main.ts",
+    "start:dev": "NODE_ENV=development nodemon --watch-dir server --ext \"ts,json\" --exec \"NODE_PATH=server:$NODE_PATH tsx server/main.ts --dev\""
   },
   "dependencies": {
     "@fastify/swagger": "^8.8.0",
@@ -22,11 +24,17 @@
     "zod-error": "^1.5.0"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.4",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
     "eslint": "^8.45.0",
+    "expect": "^29.6.1",
+    "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
+    "supertest": "^6.3.3",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
     "typescript": "^5.1.6"

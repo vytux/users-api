@@ -15,11 +15,12 @@
       "ES2022"
     ],
     "strict": true,
-    "types": ["node"],
+    "types": ["node", "mocha"],
     "skipLibCheck": true,
     "noImplicitOverride": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
   },
   "include": [
     "**/*.ts"

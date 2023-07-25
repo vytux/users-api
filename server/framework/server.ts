@@ -102,6 +102,12 @@ export const server = async ({
           ...response,
         },
         handler: async (req, res) => {
+          /**
+           * Combines all input into a single object.
+           * The downside is that values with the same keys from different
+           * input methods will overwrite each other, so this could be improved
+           * in the future by separating them into `{ params: {}, query: {}, body: {}, headers: {} }`.
+           */
           const data = {
             ...(req.params ?? {}),
             ...(req.query ?? {}),
@@ -145,7 +151,7 @@ export const server = async ({
   })
 
   return {
-    start: async (callback: (
+    start: async (callback?: (
       server: typeof httpServer,
       error: Error | null,
       address: string,
@@ -154,12 +160,14 @@ export const server = async ({
       await httpServer.listen(
         { host, port },
         (err, address) => {
-          callback(httpServer, err, address);
+          callback?.(httpServer, err, address);
           if (documentationRoute) {
             httpServer.log.info(`Documentation available at http://${host}:${port}${documentationRoute}`);
           }
         },
       );
     },
+
+    stop: () => httpServer.close(),
   };
 };
