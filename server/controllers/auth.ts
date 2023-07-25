@@ -9,6 +9,7 @@ export default Controller('/auth', {
 
   index: Action.post(
     {
+      isPublic: true,
       summary: 'Authenticate',
       body: {
         email: UserSchema.shape.email,
@@ -27,6 +28,7 @@ export default Controller('/auth', {
 
   refresh: Action.post(
     {
+      isPublic: true,
       summary: 'Refresh authentification token',
       route: '/refresh',
       body: { refreshToken: JWTSchema },
@@ -35,6 +37,6 @@ export default Controller('/auth', {
     ({ refreshToken }) => {
       return `new ${refreshToken}`;
     },
-  )
+  ),
 
 });
