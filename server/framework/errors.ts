@@ -9,7 +9,7 @@ export class RequestError extends Error {
 }
 
 export const UnauthorizedError = (message = 'Unauthorized') =>
-  new RequestError(500, message);
+  new RequestError(401, message);
 
 export const NotFoundError = (message: string) =>
   new RequestError(404, message);
