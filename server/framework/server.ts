@@ -1,3 +1,5 @@
+import { ActionType, DefaultActionResponse, DefaultActionResponseValue } from 'framework/action';
+import { ControllerActions, Controllers } from 'framework/controller';
 import {
   ZodTypeProvider,
   jsonSchemaTransform,
@@ -5,15 +7,13 @@ import {
   validatorCompiler,
 } from 'fastify-type-provider-zod';
 import fastifySwagger, { FastifyDynamicSwaggerOptions } from '@fastify/swagger';
-import Action from 'framework/action';
-import { ControllerActions } from 'framework/controller';
 import Fastify from 'fastify';
 import { RequestError } from 'framework/errors';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { STATUS_CODES as statusCodes } from 'http';
 import { z } from 'zod';
 
-export interface FrameworkOptions<T> {
+export interface FrameworkOptions {
   /**
    * Port of the HTTP server
    */
@@ -35,23 +35,19 @@ export interface FrameworkOptions<T> {
    */
   openapi: FastifyDynamicSwaggerOptions['openapi'];
   /**
-   * List of controller that will be accessible through http
+   * All controllers in this object will be accessible through HTTP
    */
-  controllers: {
-    [K in keyof T as string]: T[K] extends ControllerActions<infer T>
-      ? ControllerActions<T>
-      : never;
-  };
+  controllers: Controllers;
 }
 
-export const server = async <Controllers>({
+export const server = async ({
   port,
   host,
   documentationRoute,
   openapi,
   controllers,
   ...fastifyOptions
-}: FrameworkOptions<Controllers>) => {
+}: FrameworkOptions) => {
   const httpServer = Fastify(fastifyOptions);
 
   /** Setup swagger */
@@ -69,9 +65,9 @@ export const server = async <Controllers>({
     });
   }
 
-  // Register controller routes into Fastify
+  // Registers controller routes into Fastify
   Object.entries<ControllerActions<unknown>>(controllers).forEach(([tag, controller]) => {
-    Object.values<Action<unknown, unknown, unknown, unknown, unknown>>(controller).forEach(action => {
+    Object.values<ActionType<unknown, unknown, unknown, unknown, unknown>>(controller).forEach(action => {
       const params = action.params instanceof z.ZodUndefined
         ? {}
         : { params: action.params };
@@ -88,6 +84,10 @@ export const server = async <Controllers>({
         ? {}
         : { body: action.body };
 
+      const response = action.output === DefaultActionResponse
+        ? { 200: DefaultActionResponse }
+        : { 200: action.output as unknown };
+
       httpServer.withTypeProvider<ZodTypeProvider>().route({
         url: action.route,
         method: action.method,
@@ -99,14 +99,24 @@ export const server = async <Controllers>({
           ...query,
           ...body,
           ...headers,
-          response: { 200: action.output },
+          ...response,
         },
-        handler: async (req, res) => res.send(await action({
-          ...(req.params ?? {}),
-          ...(req.query ?? {}),
-          ...(req.body ?? {}),
-          ...(req.headers ?? {}),
-        })),
+        handler: async (req, res) => {
+          const data = {
+            ...(req.params ?? {}),
+            ...(req.query ?? {}),
+            ...(req.body ?? {}),
+            ...(req.headers ?? {}),
+          };
+
+          const result = await action(data) as unknown;
+
+          if (action.output === DefaultActionResponse) {
+            res.send(DefaultActionResponseValue);
+          } else {
+            res.send(result);
+          }
+        },
       });
     });
   });

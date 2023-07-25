@@ -23,7 +23,6 @@ server({
     },
   },
 
-  // List of active controllers
   // Every controller in this list will be accessible through api
   controllers: {
     auth,
