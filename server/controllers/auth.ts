@@ -1,9 +1,8 @@
 import Action from 'framework/action';
 import { Controller } from 'framework/controller';
+import { JWTSchema } from 'services/jwt';
 import { UserSchema } from 'user/types';
 import { z } from 'zod';
-
-const JWTSchema = z.string().describe('JWT');
 
 export default Controller('/auth', {
 
@@ -16,7 +15,7 @@ export default Controller('/auth', {
         password: UserSchema.shape.password,
       },
       output: z.object({ token: JWTSchema, refreshToken: JWTSchema })
-        .describe('Authentification tokens'),
+        .describe('Authentication tokens'),
     },
     () => {
       return {
@@ -29,7 +28,7 @@ export default Controller('/auth', {
   refresh: Action.post(
     {
       isPublic: true,
-      summary: 'Refresh authentification token',
+      summary: 'Refresh authentication token',
       route: '/refresh',
       body: { refreshToken: JWTSchema },
       output: JWTSchema,

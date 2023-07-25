@@ -4,12 +4,17 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   env: z.string(),
+
   HTTP_PORT: z.coerce.number().positive(),
   HTTP_HOST: z.string().nonempty(),
+
   HTTP_LOG: z.preprocess(
     n => typeof n === 'string' && n.toLowerCase() === 'true',
     z.boolean(),
   ),
+
+  JWT_PRIVATE_KEY: z.string().nonempty(),
+  JWT_PUBLIC_KEY: z.string().nonempty(),
 });
 
 let result: z.infer<typeof envSchema>;

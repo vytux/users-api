@@ -6,7 +6,7 @@ import request from 'supertest';
 describe('auth', () => {
   const authData = { email: 'test@mail.com', password: 'test-password' };
 
-  it('returns authentification token', async () => {
+  it('returns authentication token', async () => {
     const response = await request(address)
       .post(auth.index.route)
       .send(authData);
@@ -15,7 +15,7 @@ describe('auth', () => {
     expect(typeof response.body.token).toBe('string');
   });
 
-  it('refreshes authentification token', async () => {
+  it('refreshes authentication token', async () => {
     const authResponse = await request(address)
       .post(auth.index.route)
       .send(authData);
