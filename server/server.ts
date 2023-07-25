@@ -3,6 +3,8 @@ import config from 'config';
 import { server } from 'framework/server';
 import users from 'controllers/users';
 
+export const address = `http://${config.HTTP_HOST}:${config.HTTP_PORT}`;
+
 export default (options?: Parameters<typeof server>[0]) => server({
   // HTTP server configuration
   port: config.HTTP_PORT,
