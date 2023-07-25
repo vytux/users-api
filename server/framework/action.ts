@@ -1,4 +1,3 @@
-import { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 export type Route = `/${string}`;
@@ -15,24 +14,25 @@ type ActionOutput<Output> = Output extends z.ZodType<infer A, infer B, infer C>
 type ActionHandler<Input, Output> = Input extends z.ZodRawShape
   ? (Output extends z.ZodType<infer A, infer B, infer C>
     ? {
-      (_: z.infer<ReturnType<typeof z.object<Input>>>): z.infer<z.ZodType<A, B, C>>;
+      (req: z.infer<ReturnType<typeof z.object<Input>>>): z.infer<z.ZodType<A, B, C>>;
     }
     : {
-      (_: z.infer<ReturnType<typeof z.object<Input>>>): void;
+      (req: z.infer<ReturnType<typeof z.object<Input>>>): void;
     }
   )
   : (Output extends z.ZodType<infer A, infer B, infer C>
     ? {
-      (_?: FastifyRequest): z.infer<z.ZodType<A, B, C>>;
+      (ignore?: unknown): z.infer<z.ZodType<A, B, C>>;
     }
     : {
-      (_?: FastifyRequest): void;
+      (ignore?: unknown): void;
     }
   );
 
 type ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType> = {
   readonly method: HttpMethod;
   readonly route: Route;
+  readonly isPublic: boolean;
   readonly params: ParamsType;
   readonly query: QueryType;
   readonly body: BodyType;
@@ -59,6 +59,7 @@ function action<
 >({
   route = '/',
   method,
+  isPublic,
   params,
   query,
   body,
@@ -68,6 +69,7 @@ function action<
 }: {
   method: HttpMethod;
   route?: Route;
+  isPublic?: true;
   params?: Params;
   query?: Query;
   body?: Body;
@@ -78,6 +80,7 @@ function action<
   const props = {
     method,
     route,
+    isPublic: isPublic ?? false,
     params: params ? z.object(params) : z.undefined(),
     query: query ? z.object(query) : z.undefined(),
     body: body ? z.object(body) : z.undefined(),

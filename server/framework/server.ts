@@ -98,7 +98,12 @@ export const server = async <Controllers>({
           ...headers,
           response: { 200: action.output },
         },
-        handler: async (req, res) => res.send(await action(req)),
+        handler: async (req, res) => res.send(await action({
+          ...(req.params ?? {}),
+          ...(req.query ?? {}),
+          ...(req.body ?? {}),
+          ...(req.headers ?? {}),
+        })),
       });
     });
   });

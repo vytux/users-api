@@ -31,4 +31,4 @@ export const Controller = <
 
     return [name, action]
   }),
-)) as ControllerActions<T>;
+)) as T;
