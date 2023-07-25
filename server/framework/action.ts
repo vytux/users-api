@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export type Route = `/${string}`;
-export type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE';
+export type HttpMethod = 'GET' | 'PUT' | 'PATCH' | 'POST' | 'DELETE';
 
 /**
  * Default value to return if action has no `output` type
@@ -158,13 +158,15 @@ type ActionWrapper = <Params, Query, Body, Headers, Output>(
 ) => ReturnType<typeof action<Params, Query, Body, Headers, Output>>;
 
 const actionGet: ActionWrapper = (settings, handler) => action({ method: 'GET', handler, ...settings });
-const actionPost: ActionWrapper = (settings, handler) => action({ method: 'POST', handler, ...settings });
 const actionPut: ActionWrapper = (settings, handler) => action({ method: 'PUT', handler, ...settings });
+const actionPatch: ActionWrapper = (settings, handler) => action({ method: 'PATCH', handler, ...settings });
+const actionPost: ActionWrapper = (settings, handler) => action({ method: 'POST', handler, ...settings });
 const actionDelete: ActionWrapper = (settings, handler) => action({ method: 'DELETE', handler, ...settings });
 
 export default {
   get: actionGet,
-  post: actionPost,
   put: actionPut,
+  patch: actionPatch,
+  post: actionPost,
   delete: actionDelete,
 };
