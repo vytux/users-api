@@ -1,3 +1,4 @@
+import auth from 'controllers/auth';
 import config from 'config';
 import { server } from 'framework/server';
 import users from 'controllers/users';
@@ -22,7 +23,10 @@ server({
     },
   },
 
+  // List of active controllers
+  // Every controller in this list will be accessible through api
   controllers: {
+    auth,
     users,
   },
 }).then(({ start }) => start(({ log }, err) => {
