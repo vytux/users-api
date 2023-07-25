@@ -10,7 +10,7 @@
     "typecheck": "tsc -b",
     "typecheck:watch": "tsc -b --watch",
     "test": "NODE_ENV=test NODE_PATH=server:$NODE_PATH ts-mocha -p server/tsconfig.json",
-    "test:watch": "NODE_ENV=test NODE_PATH=server:$NODE_PATH ts-mocha -p server/tsconfig.json --watch",
+    "test:watch": "NODE_ENV=test NODE_PATH=server:$NODE_PATH ts-mocha -p server/tsconfig.json -R min --watch-extensions ts --watch",
     "start": "NODE_ENV=production NODE_PATH=server:$NODE_PATH tsx server/main.ts",
     "start:dev": "NODE_ENV=development nodemon --watch-dir server --ext \"ts,json\" --exec \"NODE_PATH=server:$NODE_PATH tsx server/main.ts --dev\""
   },
