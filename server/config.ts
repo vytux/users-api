@@ -1,26 +1,49 @@
-import 'dotenv/config';
 import { ErrorMessageOptions, generateErrorMessage } from 'zod-error';
+import { config } from 'dotenv';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  HTTP_PORT: z.preprocess(
-    n => parseInt(z.string().parse(n), 10),
-    z.number().positive(),
-  ),
+  HTTP_PORT: z.coerce.number().positive(),
   HTTP_HOST: z.string().nonempty(),
+  HTTP_LOG: z.preprocess(
+    n => typeof n === 'string' && n.toLowerCase() === 'true',
+    z.boolean(),
+  ),
 });
 
-const result = envSchema.safeParse(process.env);
+let result: z.infer<typeof envSchema>;
 
-if (!result.success) {
-  const options: ErrorMessageOptions = {
-    delimiter: { error: '\n' },
-    transform: ({ errorMessage }) => ` 🔥 .env: ${errorMessage}`,
-  };
+try {
+  const path = process.env.NODE_ENV
+    ? `.env.${process.env.NODE_ENV.toLowerCase()}`
+    : '.env';
 
-  // eslint-disable-next-line no-console
-  console.log(generateErrorMessage(result.error.issues, options));
-  process.exit(1);
+  const cfg = config({ path });
+
+  if (cfg.error) {
+    const error = new z.ZodError([]);
+    error.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: [path],
+      message: cfg.error.message,
+    });
+    throw error;
+  }
+
+  result = envSchema.parse(cfg.parsed);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    const errorFormatOptions: ErrorMessageOptions = {
+      delimiter: { error: '\n' },
+      transform: ({ errorMessage }) => ` 🔥 .env: ${errorMessage}`,
+    };
+
+    // eslint-disable-next-line no-console
+    console.log(generateErrorMessage(error.issues, errorFormatOptions));
+    process.exit(1);
+  } else {
+    throw error;
+  }
 }
 
-export default result.data;
+export default result;

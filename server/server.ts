@@ -3,13 +3,13 @@ import config from 'config';
 import { server } from 'framework/server';
 import users from 'controllers/users';
 
-server({
+export default (options?: Parameters<typeof server>[0]) => server({
   // HTTP server configuration
   port: config.HTTP_PORT,
   host: config.HTTP_HOST,
 
   // Enable / disable logging
-  logger: true,
+  logger: config.HTTP_LOG,
 
   // Documentation URL
   documentationRoute: '/documentation',
@@ -28,9 +28,7 @@ server({
     auth,
     users,
   },
-}).then(({ start }) => start(({ log }, err) => {
-  if (err) {
-    log.error(err);
-    process.exit(1);
-  }
-}));
+
+  // Inject options from the outside
+  ...(options ?? {}),
+});
