@@ -15,11 +15,17 @@ This will open api testing page.
 
 You can use `/auth` call with credentials created in setup step to get access token. Use access token from the response to authenticate (use the button in the UI) to be able to access other api routes.
 
+<img width="1013" alt="Screenshot 2023-07-27 at 01 48 36" src="https://github.com/vytux/users-api/assets/206710/7c5c4217-67f4-4cdf-a045-4c6935571e01">
+
+
 ## Running tests
 
 1. Run `yarn` in the main directory to install dependencies
 2. Configure by running `yarn setup:test` command. Keep in mind that the database you set will be cleaned up on every tests run, so use a different one from production.
 3. Run `yarn test`
+
+<img width="717" alt="Screenshot 2023-07-27 at 01 50 25" src="https://github.com/vytux/users-api/assets/206710/88bf3f80-6314-4d02-801c-4b29abcaa547">
+
 
 ## Development
 
