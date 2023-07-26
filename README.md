@@ -84,8 +84,8 @@ To make action accessable without authentication, use public actions: `Action.pu
 
 ## Future improvements
 
+- Add better database abstraction, maybe even some query builder
 - Add http rate limiting using `Fastify-rate-limit` library
 - Add cors configuration using `fastify-cors` library
-- Add better database abstraction
 - Add middleware support
 - Separate action input by their sources
