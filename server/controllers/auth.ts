@@ -1,7 +1,7 @@
+import { UserPasswordSchema, UserShape } from 'models/user';
 import Action from 'framework/action';
 import { Controller } from 'framework/controller';
 import { JWTSchema } from 'services/jwt';
-import { UserSchema } from 'user/types';
 import { z } from 'zod';
 
 export default Controller('/auth', {
@@ -11,8 +11,8 @@ export default Controller('/auth', {
       isPublic: true,
       summary: 'Authenticate',
       body: {
-        email: UserSchema.shape.email,
-        password: UserSchema.shape.password,
+        email: UserShape.email,
+        password: UserPasswordSchema,
       },
       output: z.object({ token: JWTSchema, refreshToken: JWTSchema })
         .describe('Authentication tokens'),

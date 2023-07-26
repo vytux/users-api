@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { UserShape } from 'user/types';
+import { UserIdSchema } from 'models/user';
 import config from 'config';
 import { z } from 'zod';
 
@@ -7,7 +7,7 @@ import { z } from 'zod';
  * Authentication token data
  */
 const JWTDataShape = {
-  id: UserShape.id,
+  id: UserIdSchema,
 };
 export const JWTDataSchema = z.object({
   ...JWTDataShape,
@@ -69,5 +69,5 @@ export const refreshTokens = (refreshToken: string) => {
   );
 
   // Create new access and refresh token pair
-  return createTokens(data, data.refreshCount + 1);
+  return createTokens(data, (data.refreshCount ?? 0) + 1);
 }
