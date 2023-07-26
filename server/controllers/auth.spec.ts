@@ -1,10 +1,14 @@
 import { address } from 'server';
 import auth from 'controllers/auth';
+import { defaultTestUser } from 'test-const';
 import { expect } from 'expect';
 import request from 'supertest';
 
 describe('auth', () => {
-  const authData = { email: 'test@mail.com', password: 'test-password' };
+  const authData = {
+    email: defaultTestUser.email,
+    password: defaultTestUser.password
+  } as const;
 
   it('returns authentication token', async () => {
     const response = await request(address)

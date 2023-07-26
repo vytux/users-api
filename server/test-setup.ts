@@ -6,11 +6,26 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import server from 'server';
 
+// Re-create database schema
+const schema = readFileSync(join(__dirname, 'schema.sql')).toString();
+
 let stop: () => void;
 
 before(async () => {
-  // Re-create database schema
-  const schema = readFileSync(join(__dirname, 'schema.sql')).toString();
+  // Start http server
+  const result = await server();
+  stop = result.stop;
+  await new Promise((resolve) => result.start(resolve));
+});
+
+after(async () => {
+  // Stop http server
+  await stop();
+  await databaseDisconnect();
+});
+
+beforeEach(async () => {
+  // Seed database
   await databaseQuery(schema);
 
   // Create test user
@@ -22,15 +37,4 @@ before(async () => {
       await encryptPassword(defaultTestUser.password, config.PASSWORD_SALT_ROUNDS),
     ],
   );
-
-  // Start http server
-  const result = await server();
-  stop = result.stop;
-  await new Promise((resolve) => result.start(resolve));
-});
-
-after(async () => {
-  // Stop http server
-  await stop();
-  await databaseDisconnect();
 });
