@@ -29,21 +29,25 @@ type ZodTypeOrDefaultResponse<T> = T extends z.ZodType<infer A, infer B, infer C
  * Returns action handler type, depending on `Input` and `Output` values.
  * 
  * If both `Input` and `Output` are zod types, it returns:
- *  { (req: z.infer<Input>): z.infer<Output>; }
+ *  { (req: z.infer<Input>): z.infer<Output> | Promise<z.infer<Output>>; }
  * 
  * If only `Input` is a zod type, it returns:
  *  { (req: z.infer<Input>): void; }
  * 
  * If only `Output` is a zod type, it returns:
- *  { (ignore?: unknown): z.infer<Output>; }
+ *  { (ignore?: unknown): z.infer<Output> | Promise<z.infer<Output>>; }
  */
 type ActionHandler<Input, Output> = Input extends z.ZodRawShape
   ? (Output extends z.ZodType<infer A, infer B, infer C>
-    ? { (req: z.infer<ReturnType<typeof z.object<Input>>>): z.infer<z.ZodType<A, B, C>>; }
+    ? {
+      (
+        req: z.infer<ReturnType<typeof z.object<Input>>>
+      ): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>;
+    }
     : { (req: z.infer<ReturnType<typeof z.object<Input>>>): void; }
   )
   : (Output extends z.ZodType<infer A, infer B, infer C>
-    ? { (ignore?: unknown): z.infer<z.ZodType<A, B, C>>; }
+    ? { (ignore?: unknown): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>; }
     : { (ignore?: unknown): void; }
   );
 
