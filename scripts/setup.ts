@@ -2,9 +2,9 @@
 import { ErrorMessageOptions, generateErrorMessage } from 'zod-error';
 import { UserPasswordSchema, UserShape } from '../server/models/user';
 import { confirm, input, password } from '@inquirer/prompts';
-import { postgresConnect, postgresDisconnect, postgresQuery } from '../server/services/pgsql';
 import { readFileSync, writeFileSync } from 'fs';
-import { encryptPassword } from '../server/services/password';
+import Password from '../server/services/password';
+import Postgres from '../server/services/pgsql';
 import { generate } from 'rsa-keypair';
 import { join } from 'path';
 import { z } from 'zod';
@@ -106,15 +106,15 @@ const setupDb = async (prefix: string, saltRounds: number) => {
 
   // Test database connection
   try {
-    const db = await postgresConnect(
+    const db = await Postgres.connect(
       pgsqlDefaults.pgsqlUsername,
       pgsqlDefaults.pgsqlPassword,
       pgsqlDefaults.pgsqlDatabase,
       pgsqlDefaults.pgsqlHost,
       pgsqlDefaults.pgsqlPort
     );
-    await postgresQuery(db, 'SELECT current_database()');
-    await postgresDisconnect(db);
+    await Postgres.query(db, 'SELECT current_database()');
+    await Postgres.disconnect(db);
   } catch (error) {
     console.log(' 🔥 Failed to connect to the PostgreSQL using given credentials');
     return;
@@ -133,7 +133,7 @@ const setupDb = async (prefix: string, saltRounds: number) => {
 };
 
 const seedDb = async (prefix: string, cfg: typeof pgsqlDefaults, saltRounds: number) => {
-  const db = await postgresConnect(
+  const db = await Postgres.connect(
     cfg.pgsqlUsername,
     cfg.pgsqlPassword,
     cfg.pgsqlDatabase,
@@ -142,7 +142,7 @@ const seedDb = async (prefix: string, cfg: typeof pgsqlDefaults, saltRounds: num
   );
 
   const schema = readFileSync(join(__dirname, '..', 'server', 'schema.sql')).toString();
-  await postgresQuery(db, schema);
+  await Postgres.query(db, schema);
 
   console.log(' ✅ Database schema created');
 
@@ -164,13 +164,13 @@ const seedDb = async (prefix: string, cfg: typeof pgsqlDefaults, saltRounds: num
     UserPasswordSchema,
   );
 
-  await postgresQuery(
+  await Postgres.query(
     db,
     'INSERT INTO "public"."users" ("name", "email", "password") VALUES ($1::text, $2::citext, $3::text);',
-    [userName, userEmail, await encryptPassword(userPassword, saltRounds)],
+    [userName, userEmail, await Password.encrypt(userPassword, saltRounds)],
   );
 
-  await postgresDisconnect(db);
+  await Postgres.disconnect(db);
 };
 
 /**

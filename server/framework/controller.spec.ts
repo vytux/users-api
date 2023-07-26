@@ -8,7 +8,7 @@ describe('controller', () => {
 
   it('extends action routes', () => {
     const result = Controller('/test', {
-      toUpper: Action.get({
+      toUpper: Action.publicGet({
         route: '/toUpper/:text',
         params: { text: z.string() },
       }, toUpper),

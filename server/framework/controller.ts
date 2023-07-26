@@ -10,8 +10,8 @@ export type Controllers = Record<string, Record<string, unknown>>;
  * Defines generic `Controller`.
  */
 export type ControllerActions<T> = {
-  [K in keyof T as string]: T[K] extends ActionType<infer Params, infer Query, infer Body, infer Headers, infer Output>
-    ? ActionType<Params, Query, Body, Headers, Output>
+  [K in keyof T as string]: T[K] extends ActionType<infer Params, infer Query, infer Body, infer Output>
+    ? ActionType<Params, Query, Body, Output>
     : never;
 };
 

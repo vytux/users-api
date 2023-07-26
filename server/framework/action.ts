@@ -29,40 +29,47 @@ type ZodTypeOrDefaultResponse<T> = T extends z.ZodType<infer A, infer B, infer C
  * Returns action handler type, depending on `Input` and `Output` values.
  * 
  * If both `Input` and `Output` are zod types, it returns:
- *  { (req: z.infer<Input>): z.infer<Output> | Promise<z.infer<Output>>; }
+ *  { (userId: string | undefined, req: z.infer<Input>): z.infer<Output> | Promise<z.infer<Output>>; }
  * 
  * If only `Input` is a zod type, it returns:
- *  { (req: z.infer<Input>): void; }
+ *  { (userId: string | undefined, req: z.infer<Input>): void; }
  * 
  * If only `Output` is a zod type, it returns:
- *  { (ignore?: unknown): z.infer<Output> | Promise<z.infer<Output>>; }
+ *  { (userId: string | undefined, ignore?: unknown): z.infer<Output> | Promise<z.infer<Output>>; }
  */
 type ActionHandler<Input, Output> = Input extends z.ZodRawShape
   ? (Output extends z.ZodType<infer A, infer B, infer C>
-    ? {
-      (
-        req: z.infer<ReturnType<typeof z.object<Input>>>
-      ): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>;
-    }
-    : { (req: z.infer<ReturnType<typeof z.object<Input>>>): void; }
+    ? { (
+      userId: string | undefined,
+      req: z.infer<ReturnType<typeof z.object<Input>>>
+    ): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>; }
+    : { (
+      userId: string | undefined,
+      req: z.infer<ReturnType<typeof z.object<Input>>>
+    ): void; }
   )
   : (Output extends z.ZodType<infer A, infer B, infer C>
-    ? { (ignore?: unknown): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>; }
-    : { (ignore?: unknown): void; }
+    ? { (
+      userId: string | undefined,
+      ignore?: unknown
+    ): z.infer<z.ZodType<A, B, C>> | Promise<z.infer<z.ZodType<A, B, C>>>; }
+    : { (
+      userId: string | undefined,
+      ignore?: unknown
+    ): void; }
   );
 
 /**
  * Properties of an action.
  * These properties gets attached to the action handler.
  */
-type ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType> = {
+type ActionProps<ParamsType, QueryType, BodyType, OutputType> = {
   readonly method: HttpMethod;
   readonly route: Route;
   readonly isPublic: boolean;
   readonly params: ParamsType;
   readonly query: QueryType;
   readonly body: BodyType;
-  readonly headers: HeadersType;
   readonly output: OutputType;
   readonly summary: string | undefined;
   readonly description: string | undefined;
@@ -71,13 +78,12 @@ type ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType> = {
 /**
  * A type of action handler, including `ActionProps`.
  */
-export type ActionType<Params, Query, Body, Headers, Output> =
-  ActionHandler<Params & Query & Body & Headers, Output>
+export type ActionType<Params, Query, Body, Output> =
+  ActionHandler<Params & Query & Body, Output>
   & ActionProps<
   ZodObjectOrUndefined<Params>,
   ZodObjectOrUndefined<Query>,
   ZodObjectOrUndefined<Body>,
-  ZodObjectOrUndefined<Headers>,
   ZodTypeOrDefaultResponse<Output>
   >;
 
@@ -93,13 +99,11 @@ function action<
   Params,
   Query,
   Body,
-  Headers,
   Output,
-  Input = Params & Query & Body & Headers,
+  Input = Params & Query & Body,
   ParamsType = ZodObjectOrUndefined<Params>,
   QueryType = ZodObjectOrUndefined<Query>,
   BodyType = ZodObjectOrUndefined<Body>,
-  HeadersType = ZodObjectOrUndefined<Headers>,
   OutputType = ZodTypeOrDefaultResponse<Output>,
 >({
   route = '/',
@@ -108,7 +112,6 @@ function action<
   params,
   query,
   body,
-  headers,
   output,
   summary,
   description,
@@ -120,7 +123,6 @@ function action<
   params?: Params;
   query?: Query;
   body?: Body;
-  headers?: Headers;
   output?: Output;
   summary?: string,
   description?: string,
@@ -133,13 +135,12 @@ function action<
     params: params ? z.object(params) : z.undefined(),
     query: query ? z.object(query) : z.undefined(),
     body: body ? z.object(body) : z.undefined(),
-    headers: headers ? z.object(headers) : z.undefined(),
     output: output ?? DefaultActionResponse,
     summary,
     description,
-  } as ActionProps<ParamsType, QueryType, BodyType, HeadersType, OutputType>;
+  } as ActionProps<ParamsType, QueryType, BodyType, OutputType>;
 
-  const action = handler as ActionType<Params, Query, Body, Headers, Output>;
+  const action = handler as ActionType<Params, Query, Body, Output>;
   Object.setPrototypeOf(action, props);
 
   return action;
@@ -148,29 +149,53 @@ function action<
 /**
  * Returns options of the action
  */
-type ActionParams<Params, Query, Body, Headers, Output> =
-  Parameters<typeof action<Params, Query, Body, Headers, Output>>[0];
+type ActionParams<Params, Query, Body, Output> =
+  Parameters<typeof action<Params, Query, Body, Output>>[0];
 
 /**
  * Wraps `action()`.
  * Splits action options and handler into a separate arguments.
  * Removes `method` option, allowing to set it's value from within the wrapper.
  */
-type ActionWrapper = <Params, Query, Body, Headers, Output>(
-  settings: Omit<ActionParams<Params, Query, Body, Headers, Output>, 'method' | 'handler'>,
-  handler: ActionParams<Params, Query, Body, Headers, Output>['handler'],
-) => ReturnType<typeof action<Params, Query, Body, Headers, Output>>;
+type ActionWrapper = <Params, Query, Body, Output>(
+  settings: Omit<ActionParams<Params, Query, Body, Output>, 'method' | 'handler' | 'isPublic'>,
+  handler: ActionParams<Params, Query, Body, Output>['handler'],
+) => ReturnType<typeof action<Params, Query, Body, Output>>;
 
-const actionGet: ActionWrapper = (settings, handler) => action({ method: 'GET', handler, ...settings });
-const actionPut: ActionWrapper = (settings, handler) => action({ method: 'PUT', handler, ...settings });
-const actionPatch: ActionWrapper = (settings, handler) => action({ method: 'PATCH', handler, ...settings });
-const actionPost: ActionWrapper = (settings, handler) => action({ method: 'POST', handler, ...settings });
-const actionDelete: ActionWrapper = (settings, handler) => action({ method: 'DELETE', handler, ...settings });
+// Actions that do not require user authorization
+const publicActionGet: ActionWrapper = (settings, handler) =>
+  action({ method: 'GET', isPublic: true, handler, ...settings });
+const publicActionPut: ActionWrapper = (settings, handler) =>
+  action({ method: 'PUT', isPublic: true, handler, ...settings });
+const publicActionPatch: ActionWrapper = (settings, handler) =>
+  action({ method: 'PATCH', isPublic: true, handler, ...settings });
+const publicActionPost: ActionWrapper = (settings, handler) =>
+  action({ method: 'POST', isPublic: true, handler, ...settings });
+const publicActionDelete: ActionWrapper = (settings, handler) =>
+  action({ method: 'DELETE', isPublic: true, handler, ...settings });
+
+// Actions that require user authorization
+const privateActionGet: ActionWrapper = (settings, handler) =>
+  action({ method: 'GET', handler, ...settings });
+const privateActionPut: ActionWrapper = (settings, handler) =>
+  action({ method: 'PUT', handler, ...settings });
+const privateActionPatch: ActionWrapper = (settings, handler) =>
+  action({ method: 'PATCH', handler, ...settings });
+const privateActionPost: ActionWrapper = (settings, handler) =>
+  action({ method: 'POST', handler, ...settings });
+const privateActionDelete: ActionWrapper = (settings, handler) =>
+  action({ method: 'DELETE', handler, ...settings });
 
 export default {
-  get: actionGet,
-  put: actionPut,
-  patch: actionPatch,
-  post: actionPost,
-  delete: actionDelete,
+  publicGet: publicActionGet,
+  publicPut: publicActionPut,
+  publicPatch: publicActionPatch,
+  publicPost: publicActionPost,
+  publicDelete: publicActionDelete,
+
+  get: privateActionGet,
+  put: privateActionPut,
+  patch: privateActionPatch,
+  post: privateActionPost,
+  delete: privateActionDelete,
 };

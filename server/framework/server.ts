@@ -1,5 +1,6 @@
 import { ActionType, DefaultActionResponse, DefaultActionResponseValue } from 'framework/action';
 import { ControllerActions, Controllers } from 'framework/controller';
+import { RequestError, UnauthorizedError } from 'framework/errors';
 import {
   ZodTypeProvider,
   jsonSchemaTransform,
@@ -8,7 +9,6 @@ import {
 } from 'fastify-type-provider-zod';
 import fastifySwagger, { FastifyDynamicSwaggerOptions } from '@fastify/swagger';
 import Fastify from 'fastify';
-import { RequestError } from 'framework/errors';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { STATUS_CODES as statusCodes } from 'http';
 import { z } from 'zod';
@@ -38,6 +38,10 @@ export interface FrameworkOptions {
    * All controllers in this object will be accessible through HTTP
    */
   controllers: Controllers;
+  /**
+   * Function that validates authorization
+   */
+  authValidator: (token?: string) => Promise<string | undefined>;
 }
 
 export const server = async ({
@@ -46,6 +50,7 @@ export const server = async ({
   documentationRoute,
   openapi,
   controllers,
+  authValidator,
   ...fastifyOptions
 }: FrameworkOptions) => {
   const httpServer = Fastify(fastifyOptions);
@@ -74,7 +79,7 @@ export const server = async ({
 
   // Registers controller routes into Fastify
   Object.entries<ControllerActions<unknown>>(controllers).forEach(([tag, controller]) => {
-    Object.values<ActionType<unknown, unknown, unknown, unknown, unknown>>(controller).forEach(action => {
+    Object.values<ActionType<unknown, unknown, unknown, unknown>>(controller).forEach(action => {
       const params = action.params instanceof z.ZodUndefined
         ? {}
         : { params: action.params };
@@ -82,10 +87,6 @@ export const server = async ({
       const query = action.query instanceof z.ZodUndefined
         ? {}
         : { query: action.query };
-
-      const headers = action.headers instanceof z.ZodUndefined
-        ? {}
-        : { headers: action.headers };
 
       const body = action.method === 'GET' || action.body instanceof z.ZodUndefined
         ? {}
@@ -99,30 +100,36 @@ export const server = async ({
         url: action.route,
         method: action.method,
         schema: {
+          security: action.isPublic
+            ? []
+            : [{ bearerAuth: [] }],
           summary: action.summary,
           description: action.description,
           tags: [tag],
           ...params,
           ...query,
           ...body,
-          ...headers,
           ...response,
         },
         handler: async (req, res) => {
+          const userId = await authValidator(req.headers.authorization);
+          if (!action.isPublic && !userId) {
+            throw UnauthorizedError();
+          }
+
           /**
            * Combines all input into a single object.
            * The downside is that values with the same keys from different
            * input methods will overwrite each other, so this could be improved
-           * in the future by separating them into `{ params: {}, query: {}, body: {}, headers: {} }`.
+           * in the future by separating them into `{ params: {}, query: {}, body: {} }`.
            */
           const data = {
             ...(req.params ?? {}),
             ...(req.query ?? {}),
             ...(req.body ?? {}),
-            ...(req.headers ?? {}),
           };
 
-          const result = await action(data) as unknown;
+          const result = await action(userId, data) as unknown;
 
           if (action.output === DefaultActionResponse) {
             res.send(DefaultActionResponseValue);

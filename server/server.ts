@@ -1,3 +1,4 @@
+import Authorization from 'services/auth';
 import auth from 'controllers/auth';
 import config from 'config';
 import { server } from 'framework/server';
@@ -18,10 +19,19 @@ export default (options?: Parameters<typeof server>[0]) => server({
 
   // OpenAPI configuration
   openapi: {
+    openapi: '3.0.0',
     info: {
       title: 'Users API',
-      description: 'Backend service for creating, editing and deleting users',
       version: '1.0.0',
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
     },
   },
 
@@ -29,6 +39,15 @@ export default (options?: Parameters<typeof server>[0]) => server({
   controllers: {
     auth,
     users,
+  },
+
+  // Authorization settings
+  authValidator: async (token) => {
+    if (!token || !token.startsWith('Bearer ')) {
+      return;
+    }
+    const jwtToken = token.substring('Bearer '.length).trim();
+    return await Authorization.verify(jwtToken);
   },
 
   // Inject options from the outside

@@ -16,7 +16,16 @@ describe('auth', () => {
       .send(authData);
 
     expect(response.status).toBe(200);
-    expect(typeof response.body.token).toBe('string');
+    expect(typeof response.body.accessToken).toBe('string');
+    expect(typeof response.body.refreshToken).toBe('string');
+  });
+
+  it('fails authentication with invalid credentials', async () => {
+    const response = await request(address)
+      .post(auth.index.route)
+      .send({ email: 'some@random.com', password: 'very-random-password' });
+
+    expect(response.status).toBe(400);
   });
 
   it('refreshes authentication token', async () => {
@@ -32,6 +41,15 @@ describe('auth', () => {
       .send({ refreshToken: authResponse.body.refreshToken });
 
     expect(refreshResponse.status).toBe(200);
-    expect(typeof refreshResponse.text).toBe('string');
+    expect(typeof refreshResponse.body.accessToken).toBe('string');
+    expect(typeof refreshResponse.body.refreshToken).toBe('string');
+  });
+
+  it('fails to refresh token with invalid refresh token', async () => {
+    const refreshResponse = await request(address)
+      .post(auth.refresh.route)
+      .send({ refreshToken: 'some token' });
+
+    expect(refreshResponse.status).toBe(400);
   });
 });

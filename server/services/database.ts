@@ -1,5 +1,5 @@
-import { postgresConnect, postgresDisconnect, postgresQuery } from 'services/pgsql';
 import { Client } from 'pg';
+import Postgres from 'services/pgsql';
 import config from 'config';
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
@@ -27,7 +27,7 @@ export const databaseQuery = async (
      * In production we should probably use a connection pool,
      * but a single connection will suffice for this demo
      */
-    connection = await postgresConnect(
+    connection = await Postgres.connect(
       config.PGSQL_USERNAME,
       config.PGSQL_PASSWORD,
       config.PGSQL_DATABASE,
@@ -35,7 +35,7 @@ export const databaseQuery = async (
       config.PGSQL_PORT,
     );
   }
-  return postgresQuery(connection, query, args);
+  return Postgres.query(connection, query, args);
 };
 
 /**
@@ -43,7 +43,7 @@ export const databaseQuery = async (
  */
 export const databaseDisconnect = async () => {
   if (connection) {
-    await postgresDisconnect(connection)
+    await Postgres.disconnect(connection)
     connection = undefined;
   }
 };

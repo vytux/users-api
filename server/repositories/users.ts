@@ -7,8 +7,8 @@ import {
   userFieldTypes
 } from 'models/user';
 import { databaseFields, databaseInsert, databaseQuery, databaseUpdateById } from 'services/database';
+import Password from 'services/password';
 import config from 'config';
-import { encryptPassword } from 'services/password';
 import { z } from 'zod';
 
 const userFields = Object.keys(UserSchema.shape);
@@ -23,7 +23,7 @@ const Users = {
 
   getById: async (id: z.infer<typeof UserIdSchema>) => {
     const { rows } = await databaseQuery(
-      `SELECT ${databaseFields(userFields)} FROM "public"."users" WHERE id = $1::${userFieldTypes.id}`,
+      `SELECT ${databaseFields(userFields)} FROM "public"."users" WHERE "id" = $1::${userFieldTypes.id}`,
       [id]
     );
 
@@ -31,11 +31,26 @@ const Users = {
     return UserSchema.parse(rows[0]);
   },
 
+  getIdAndPasswordByEmail: async (
+    email: z.infer<typeof UserSchema.shape.email>,
+  ): Promise<{
+    id: z.infer<typeof UserPasswordSchema>,
+    password: z.infer<typeof UserPasswordSchema>,
+  } | null> => {
+    const { rows } = await databaseQuery(
+      `SELECT "id", "password" FROM "users" WHERE "email" = $1::${userFieldTypes.email}`,
+      [email]
+    );
+
+    if (!rows.length) return null;
+    return rows[0];
+  },
+
   create: async (
     data: z.infer<ReturnType<typeof z.object<typeof UserSchemaWithShapeAndPassword.shape>>>,
   ) => {
     // Encrypt new password
-    data.password = await encryptPassword(data.password, config.PASSWORD_SALT_ROUNDS);
+    data.password = await Password.encrypt(data.password, config.PASSWORD_SALT_ROUNDS);
     return databaseInsert(
       'users',
       { ...UserShape, password: UserPasswordSchema },

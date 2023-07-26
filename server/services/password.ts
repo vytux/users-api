@@ -1,7 +1,13 @@
 import bcrypt from 'bcrypt';
 
-export const encryptPassword = async (password: string, saltRounds: number) =>
-  await bcrypt.hash(password, saltRounds);
+const Password = {
 
-export const verifyPassword = async (password: string, encrypted: string) =>
-  await bcrypt.compare(password, encrypted);
+  encrypt: async (password: string, saltRounds: number) =>
+    await bcrypt.hash(password, saltRounds),
+
+  verify: async (password: string, encrypted: string) =>
+    await bcrypt.compare(password, encrypted),
+
+};
+
+export default Password;

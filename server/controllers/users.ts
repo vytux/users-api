@@ -22,7 +22,7 @@ export default Controller('/users', {
       params: { id: UserIdSchema },
       output: UserSchema,
     },
-    async ({ id }) => {
+    async (userId, { id }) => {
       const user = await Users.getById(id);
       if (user === null) {
         throw NotFoundError('User not found');
@@ -39,7 +39,7 @@ export default Controller('/users', {
       body: UserShape,
       output: UserSchema,
     },
-    async ({ id, ...userData }) => {
+    async (userId, { id, ...userData }) => {
       await Users.updateById(id, userData);
 
       const user = await Users.getById(id);
@@ -58,7 +58,7 @@ export default Controller('/users', {
       body: z.object(UserShape).partial().shape,
       output: UserSchema,
     },
-    async ({ id, ...userData }) => {
+    async (userId, { id, ...userData }) => {
       await Users.updateById(id, userData);
 
       const user = await Users.getById(id);
@@ -75,7 +75,7 @@ export default Controller('/users', {
       body: UserSchemaWithShapeAndPassword.shape,
       output: UserSchema,
     },
-    async (data) => {
+    async (userId, data) => {
       const id = await Users.create(data);
 
       const user = await Users.getById(id);
@@ -92,7 +92,7 @@ export default Controller('/users', {
       route: '/:id',
       params: { id: UserIdSchema },
     },
-    async ({ id }) => await Users.deleteById(id),
+    async (userId, { id }) => await Users.deleteById(id),
   ),
 
 });

@@ -1,4 +1,6 @@
 import { address } from 'server';
+import auth from 'controllers/auth';
+import { defaultTestUser } from 'test-const';
 import { expect } from 'expect';
 import request from 'supertest';
 import users from 'controllers/users';
@@ -7,6 +9,14 @@ describe('users', () => {
   // This test should be split into multiple ones to track bugs easier
   // But it will do for this demo
   it('creates, updates, patches and returns user ', async () => {
+    const authResponse = await request(address)
+      .post(auth.index.route)
+      .send(defaultTestUser);
+
+    const authHeaders = {
+      'Authorization': `Bearer ${authResponse.body.accessToken}`,
+    };
+
     const testUser = {
       name: 'Test user 1',
       email: 'test1@user.com',
@@ -18,6 +28,7 @@ describe('users', () => {
      */
     const createResponse = await request(address)
       .post(users.create.route)
+      .set(authHeaders)
       .send(testUser);
 
     const id = createResponse.body.id;
@@ -36,6 +47,7 @@ describe('users', () => {
      */
     const getResponse1 = await request(address)
       .get(users.getById.route.replace(':id', id))
+      .set(authHeaders)
       .send();
 
     expect(getResponse1.status).toBe(200);
@@ -53,6 +65,7 @@ describe('users', () => {
     const newName = 'Test user 2';
     const patchResponse = await request(address)
       .patch(users.patch.route.replace(':id', id))
+      .set(authHeaders)
       .send({ name: newName });
 
     expect(patchResponse.status).toBe(200);
@@ -69,6 +82,7 @@ describe('users', () => {
      */
     const getResponse2 = await request(address)
       .get(users.getById.route.replace(':id', id))
+      .set(authHeaders)
       .send();
 
     expect(getResponse2.status).toBe(200);
@@ -85,6 +99,7 @@ describe('users', () => {
      */
     const updateResponse = await request(address)
       .put(users.update.route.replace(':id', id))
+      .set(authHeaders)
       .send(testUser);
 
     expect(updateResponse.status).toBe(200);
@@ -101,6 +116,7 @@ describe('users', () => {
      */
     const getResponse3 = await request(address)
       .get(users.getById.route.replace(':id', id))
+      .set(authHeaders)
       .send();
 
     expect(getResponse3.status).toBe(200);
@@ -117,6 +133,7 @@ describe('users', () => {
      */
     const deleteResponse = await request(address)
       .delete(users.delete.route.replace(':id', id))
+      .set(authHeaders)
       .send();
 
     expect(deleteResponse.status).toBe(200);
@@ -128,6 +145,7 @@ describe('users', () => {
      */
     const getResponse4 = await request(address)
       .get(users.getById.route.replace(':id', id))
+      .set(authHeaders)
       .send();
 
     expect(getResponse4.status).toBe(404);

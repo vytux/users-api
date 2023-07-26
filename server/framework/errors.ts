@@ -13,3 +13,6 @@ export const UnauthorizedError = (message = 'Unauthorized') =>
 
 export const NotFoundError = (message: string) =>
   new RequestError(404, message);
+
+export const InvalidTokenError = (message = 'Invalid token') =>
+  new RequestError(400, message);
