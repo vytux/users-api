@@ -63,6 +63,25 @@ Framework consists of 3 things:
 2. `controller`, defined in `framework/controller.ts`. Groups actions and adds route prefix to them.
 3. `action`, defined in `framework/action.ts`. Action is an http request handler. They are typed using zod and does automatic type inference based on given `param`, `query`, `body` and `output` parameters.
 
+Example of basic public controller with `GET` action that reverses a given string in a query `?str=`:
+
+```ts
+export default Controller('/strings', {
+  reverseString: Action.publicGet(
+    {
+      route: '/reverse',
+      summary: 'Reverses a given string',
+      query: { str: z.string().nonempty().describe('String to reverse') },
+      output: z.string().describe('Reversed string'),
+    },
+    (userId, { str }) => str.split('').reverse().join(''),
+  ),
+});
+```
+
+All actions requires authentication by default: `Action.get`, `Action.post`, etc.
+To make action accessable without authentication, use public actions: `Action.publicGet`, `Action.publicPost`, etc.
+
 ## Future improvements
 
 - Add http rate limiting using `Fastify-rate-limit` library
