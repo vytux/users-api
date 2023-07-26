@@ -15,7 +15,7 @@ Tested using NodeJS v18.
 
 This will open api testing page.
 
-You can use `/auth` call with credentials created in setup step to get access token. Use access token from the response to authenticate (use the button in the UI) to be able to access other api routes.
+You can use `/auth/` call with credentials created in setup step to get access token. Use access token from the response to authenticate (use the button in the UI) to be able to access other api routes.
 
 <img width="1013" alt="Screenshot 2023-07-27 at 01 48 36" src="https://github.com/vytux/users-api/assets/206710/7c5c4217-67f4-4cdf-a045-4c6935571e01">
 
