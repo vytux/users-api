@@ -1,6 +1,5 @@
-import { address } from 'server';
+import { address, defaultTestUser } from 'test-const';
 import auth from 'controllers/auth';
-import { defaultTestUser } from 'test-const';
 import { expect } from 'expect';
 import request from 'supertest';
 

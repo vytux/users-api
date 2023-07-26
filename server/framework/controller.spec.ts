@@ -4,7 +4,7 @@ import expect from 'expect';
 import { z } from 'zod';
 
 describe('controller', () => {
-  const toUpper = (data: { text: string}) => data.text.toUpperCase();
+  const toUpper = (userId: string | undefined, data: { text: string}) => data.text.toUpperCase();
 
   it('extends action routes', () => {
     const result = Controller('/test', {
@@ -16,6 +16,6 @@ describe('controller', () => {
 
     expect(result.toUpper.method).toBe('GET');
     expect(result.toUpper.route).toBe('/test/toUpper/:text');
-    expect(result.toUpper({ text: 'John' })).toBe('JOHN');
+    expect(result.toUpper(undefined, { text: 'John' })).toBe('JOHN');
   });
 });

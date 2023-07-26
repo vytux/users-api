@@ -8,6 +8,9 @@ import { z } from 'zod';
 
 export default Controller('/auth', {
 
+  /**
+   * User login with email and password
+   */
   index: Action.publicPost(
     {
       summary: 'Authenticate',
@@ -31,6 +34,9 @@ export default Controller('/auth', {
     },
   ),
 
+  /**
+   * Refresh authorization token
+   */
   refresh: Action.publicPost(
     {
       summary: 'Refresh authentication token',

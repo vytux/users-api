@@ -8,15 +8,24 @@ let connection: Client | undefined;
 
 export type DatabaseFieldType = 'uuid' | 'text' | 'citext' | 'timestamp';
 
+/**
+ * Defines field types for a zod shape.
+ * Used in `databaseInsert` and `databaseUpdateById` helpers.
+ */
 export type FieldTypes<T extends object> = {
   readonly [K in keyof T as string]: DatabaseFieldType;
 };
 
+/**
+ * Formats given list of fields into a string that can be
+ * used in query as a list of fields.
+ */
 export const databaseFields = (fields: string[]): string =>
   fields.map(f => `"${f}"`).join(',');
 
 /**
- * Connects to the database if needed and performs a given query
+ * Performs a given query and returns result.
+ * Connects to the database if required.
  */
 export const databaseQuery = async (
   query: string,

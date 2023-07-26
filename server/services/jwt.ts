@@ -28,9 +28,17 @@ export const JWTSchema = z.string().describe('JWT');
 
 const JWT = {
 
+  /**
+   * Creates JWT token with given data and options.
+   */
   create: (data: object, options?: SignOptions) =>
     jwt.sign(data, config.JWT_PRIVATE_KEY, { ...options, algorithm: 'RS512' }),
 
+  /**
+   * Verifies given token.
+   * On success, returns token's data.
+   * On failure, throws error.
+   */
   verify: <T>(token: string): T =>
     jwt.verify(token, config.JWT_PUBLIC_KEY) as T,
 

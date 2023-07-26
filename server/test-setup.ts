@@ -6,7 +6,6 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import server from 'server';
 
-// Re-create database schema
 const schema = readFileSync(join(__dirname, 'schema.sql')).toString();
 
 let stop: () => void;
@@ -17,7 +16,7 @@ before(async () => {
 
   // Create test user
   await databaseQuery(
-    'INSERT INTO "public"."users" ("name", "email", "password") VALUES ($1::text, $2::citext, $3::text);',
+    'INSERT INTO "users" ("name", "email", "password") VALUES ($1::text, $2::citext, $3::text);',
     [
       defaultTestUser.name,
       defaultTestUser.email,
@@ -26,9 +25,11 @@ before(async () => {
   );
 
   // Start http server
-  const result = await server();
-  stop = result.stop;
-  await new Promise((resolve) => result.start(resolve));
+  const serverInstance = await server();
+  stop = serverInstance.stop;
+
+  // Wait for the server to start before continuing
+  await new Promise((resolve) => serverInstance.start(resolve));
 });
 
 after(async () => {

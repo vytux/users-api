@@ -1,3 +1,6 @@
+/**
+ * Api error types
+ */
 
 export class RequestError extends Error {
   public constructor(

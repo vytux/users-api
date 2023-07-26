@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+/**
+ * Controller's action.
+ * Action is performed when api route is called
+ * and contains all logic for that route
+ */
+
 export type Route = `/${string}`;
 export type HttpMethod = 'GET' | 'PUT' | 'PATCH' | 'POST' | 'DELETE';
 
@@ -91,7 +97,7 @@ export type ActionType<Params, Query, Body, Output> =
  * Creates new action.
  * Infers types and attaches action options to action handler.
  * 
- * @param ActionProps Action options 
+ * @param ActionProps Action options
  * @param ActionHandler Action handler
  * @returns Typed action handler with action options attached
  */

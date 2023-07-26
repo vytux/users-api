@@ -70,7 +70,9 @@ const validateField = async (
   return value;
 };
 
-
+/**
+ * Setups database configuration
+ */
 const setupDb = async (prefix: string, saltRounds: number) => {
   /**
    * Reuses `pgsqlDefaults` so that user is always suggested
@@ -132,6 +134,9 @@ const setupDb = async (prefix: string, saltRounds: number) => {
   return pgsqlDefaults;
 };
 
+/**
+ * Creates database schema and default user
+ */
 const seedDb = async (prefix: string, cfg: typeof pgsqlDefaults, saltRounds: number) => {
   const db = await Postgres.connect(
     cfg.pgsqlUsername,
@@ -166,7 +171,7 @@ const seedDb = async (prefix: string, cfg: typeof pgsqlDefaults, saltRounds: num
 
   await Postgres.query(
     db,
-    'INSERT INTO "public"."users" ("name", "email", "password") VALUES ($1::text, $2::citext, $3::text);',
+    'INSERT INTO "users" ("name", "email", "password") VALUES ($1::text, $2::citext, $3::text);',
     [userName, userEmail, await Password.encrypt(userPassword, saltRounds)],
   );
 

@@ -12,9 +12,9 @@ $set_updatedAt$ LANGUAGE plpgsql;
 
 -- Creates tables
 
-DROP TABLE IF EXISTS "public"."users";
+DROP TABLE IF EXISTS "users";
 
-CREATE TABLE "public"."users" (
+CREATE TABLE "users" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "name" text NOT NULL,
     "email" citext NOT NULL,
@@ -25,5 +25,5 @@ CREATE TABLE "public"."users" (
     CONSTRAINT "users_email" UNIQUE ("email")
 );
 
-CREATE TRIGGER table_update BEFORE UPDATE ON "public"."users"
+CREATE TRIGGER table_update BEFORE UPDATE ON "users"
 FOR EACH ROW EXECUTE PROCEDURE set_updatedAt();

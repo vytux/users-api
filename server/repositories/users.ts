@@ -1,4 +1,5 @@
 import {
+  User,
   UserIdSchema,
   UserPasswordSchema,
   UserSchema,
@@ -14,16 +15,20 @@ import { z } from 'zod';
 const userFields = Object.keys(UserSchema.shape);
 
 const Users = {
+
+  /**
+   * Returns all users
+   */
   all: async () => {
     const { rows } = await databaseQuery(
-      `SELECT ${databaseFields(userFields)} FROM "public"."users" ORDER BY "createdAt"`,
+      `SELECT ${databaseFields(userFields)} FROM "users" ORDER BY "createdAt"`,
     );
     return rows.map(data => UserSchema.parse(data));
   },
 
   getById: async (id: z.infer<typeof UserIdSchema>) => {
     const { rows } = await databaseQuery(
-      `SELECT ${databaseFields(userFields)} FROM "public"."users" WHERE "id" = $1::${userFieldTypes.id}`,
+      `SELECT ${databaseFields(userFields)} FROM "users" WHERE "id" = $1::${userFieldTypes.id}`,
       [id]
     );
 
@@ -47,7 +52,7 @@ const Users = {
   },
 
   create: async (
-    data: z.infer<ReturnType<typeof z.object<typeof UserSchemaWithShapeAndPassword.shape>>>,
+    data: z.infer<typeof UserSchemaWithShapeAndPassword>,
   ) => {
     // Encrypt new password
     data.password = await Password.encrypt(data.password, config.PASSWORD_SALT_ROUNDS);
@@ -61,7 +66,7 @@ const Users = {
 
   updateById: async (
     id: z.infer<typeof UserIdSchema>,
-    data: z.infer<ReturnType<ReturnType<typeof z.object<typeof UserShape>>['partial']>>,
+    data: z.infer<ReturnType<typeof User['partial']>>,
   ) => databaseUpdateById(
     'users',
     UserShape,
@@ -72,7 +77,7 @@ const Users = {
 
   deleteById: async (id: z.infer<typeof UserIdSchema>) => {
     await databaseQuery(
-      `DELETE FROM "public"."users" WHERE id = $1::${userFieldTypes.id}`,
+      `DELETE FROM "users" WHERE id = $1::${userFieldTypes.id}`,
       [id],
     );
   },

@@ -34,6 +34,7 @@ try {
 
   const cfg = config({ path });
 
+  // Throw error if reading configuration failed
   if (cfg.error) {
     const error = new z.ZodError([]);
     error.addIssue({
@@ -49,6 +50,7 @@ try {
     ...cfg.parsed,
   });
 } catch (error) {
+  // Format caught zod errors
   if (error instanceof z.ZodError) {
     const errorFormatOptions: ErrorMessageOptions = {
       delimiter: { error: '\n' },

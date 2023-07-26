@@ -7,6 +7,9 @@ import { z } from 'zod';
 
 export default Controller('/users', {
 
+  /**
+   * Returns a list of all users
+   */
   index: Action.get(
     {
       summary: 'Get all users',
@@ -15,6 +18,9 @@ export default Controller('/users', {
     Users.all,
   ),
 
+  /**
+   * Returns user by ID
+   */
   getById: Action.get(
     {
       summary: 'Get users by id',
@@ -31,6 +37,9 @@ export default Controller('/users', {
     },
   ),
 
+  /**
+   * Updates user by ID. All fields are required.
+   */
   update: Action.put(
     {
       summary: 'Update user',
@@ -50,6 +59,10 @@ export default Controller('/users', {
     },
   ),
 
+  /**
+   * Patches user by ID.
+   * Only fields that needs to be updated can be sent.
+   */
   patch: Action.patch(
     {
       summary: 'Partially update user',
@@ -69,6 +82,9 @@ export default Controller('/users', {
     },
   ),
 
+  /**
+   * Creates new user.
+   */
   create: Action.post(
     {
       summary: 'Create user',
@@ -86,6 +102,9 @@ export default Controller('/users', {
     },
   ),
 
+  /**
+   * Deletes user by ID
+   */
   delete: Action.delete(
     {
       summary: 'Delete user',

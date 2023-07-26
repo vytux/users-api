@@ -55,15 +55,17 @@ export const server = async ({
 }: FrameworkOptions) => {
   const httpServer = Fastify(fastifyOptions);
 
-  /** Setup swagger */
+  // Setup swagger
   httpServer.setValidatorCompiler(validatorCompiler);
   httpServer.setSerializerCompiler(serializerCompiler);
 
+  // Setup openapi
   await httpServer.register(fastifySwagger, {
     openapi,
     transform: jsonSchemaTransform,
   });
 
+  // If documentation route is set, make the documentation available on that route
   if (documentationRoute) {
     await httpServer.register(fastifySwaggerUI, {
       routePrefix: documentationRoute,
@@ -96,6 +98,7 @@ export const server = async ({
         ? { 200: DefaultActionResponse }
         : { 200: action.output as unknown };
 
+      // Register this action to the route
       httpServer.withTypeProvider<ZodTypeProvider>().route({
         url: action.route,
         method: action.method,
@@ -112,6 +115,7 @@ export const server = async ({
           ...response,
         },
         handler: async (req, res) => {
+          // Authorization
           const userId = await authValidator(req.headers.authorization);
           if (!action.isPublic && !userId) {
             throw UnauthorizedError();
@@ -129,8 +133,11 @@ export const server = async ({
             ...(req.body ?? {}),
           };
 
+          // Call the action
           const result = await action(userId, data) as unknown;
 
+          // Return action's result
+          // If action has no result type, return default action response
           if (action.output === DefaultActionResponse) {
             res.send(DefaultActionResponseValue);
           } else {
