@@ -1,3 +1,4 @@
+import { FieldTypes } from 'services/database';
 import { z } from 'zod';
 
 export const UserIdSchema = z.string()
@@ -26,3 +27,17 @@ export const UserSchema = z.object({
   ...UserShape,
   ...UserTimestampsShape,
 }).describe('User');
+
+export const UserSchemaWithShapeAndPassword = z.object({
+  ...UserShape,
+  password: UserPasswordSchema,
+});
+
+export const userFieldTypes: FieldTypes<typeof UserSchema.shape & { password: typeof UserPasswordSchema }> = {
+  id: 'uuid',
+  name: 'text',
+  email: 'citext',
+  password: 'text',
+  updatedAt: 'timestamp',
+  createdAt: 'timestamp',
+} as const;
