@@ -5,6 +5,8 @@ Implements custom micro framework using `zod`, `fastify`, `fastify-type-provider
 
 ## Running
 
+Tested using NodeJS v18.
+
 1. Clone the repository
 2. Run `yarn` in the main directory to install dependencies
 3. Configure by running `yarn setup:prod` command. Setup will ask configuration settings for env file and create it.
