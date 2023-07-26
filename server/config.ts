@@ -13,10 +13,16 @@ const envSchema = z.object({
     z.boolean(),
   ).describe('Should server logs be printed to stdout?'),
 
-  JWT_PRIVATE_KEY: z.string().nonempty().describe('Private key JWT will be encrypted with'),
-  JWT_PUBLIC_KEY: z.string().nonempty().describe('Public key JWT will be decrypted with'),
+  PGSQL_HOST: z.string().nonempty().describe('PostgreSQL host'),
+  PGSQL_PORT: z.coerce.number().gt(1).describe('PostgreSQL port'),
+  PGSQL_DATABASE: z.string().nonempty().describe('PostgreSQL database name'),
+  PGSQL_USERNAME: z.string().nonempty().describe('PostgreSQL user name'),
+  PGSQL_PASSWORD: z.string().nonempty().describe('PostgreSQL user password'),
 
   PASSWORD_SALT_ROUNDS: z.coerce.number().gt(1).describe('How many encryption rounds to use for passwords'),
+
+  JWT_PRIVATE_KEY: z.string().nonempty().describe('Private key JWT will be encrypted with'),
+  JWT_PUBLIC_KEY: z.string().nonempty().describe('Public key JWT will be decrypted with'),
 });
 
 let result: z.infer<typeof envSchema>;

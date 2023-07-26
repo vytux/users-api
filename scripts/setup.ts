@@ -214,6 +214,7 @@ const setupEnv = async (env: Environment) => {
     saltRounds,
     privateKey,
     publicKey,
+    ...pgsql,
   });
 
   writeFileSync(join(__dirname, '..', filename), envContents, { flag: 'w' });
@@ -230,9 +231,14 @@ const generateEnvContents = (data: {
   saltRounds: number;
   privateKey: Buffer;
   publicKey: Buffer;
-}) => `HTTP_HOST = "${data.httpHost}"
+} & typeof pgsqlDefaults) => `HTTP_HOST = "${data.httpHost}"
 HTTP_PORT = ${data.httpPort}\n
-HTTP_LOG = ${data.httpLog ? 'true' : 'false'}
+HTTP_LOG = ${data.httpLog ? 'true' : 'false'}\n
+PGSQL_HOST = ${data.pgsqlHost}
+PGSQL_PORT = ${data.pgsqlPort}
+PGSQL_DATABASE = ${data.pgsqlDatabase}
+PGSQL_USERNAME = ${data.pgsqlUsername}
+PGSQL_PASSWORD = ${data.pgsqlPassword}\n
 PASSWORD_SALT_ROUNDS = ${data.saltRounds}\n
 JWT_PRIVATE_KEY = "${data.privateKey.toString('ascii').trim()}"\n
 JWT_PUBLIC_KEY = "${data.publicKey.toString('ascii').trim()}"\n`;
